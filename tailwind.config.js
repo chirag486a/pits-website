@@ -3,6 +3,9 @@ export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      backgroundImage: {
+        "number-express": "url('./src/assets/img/Number-Express.png')",
+      },
       colors: {
         primary: {
           50: "var(--color-primary-50)",
