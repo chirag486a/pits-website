@@ -5,7 +5,7 @@ import FinTechEchoSystemLogo from "../assets/img/products/Fin-Tech-Echo-System-L
 import LekkAstraLogo from "../assets/img/products/LekhAstraLogo.png";
 import FinAstraLogo from "../assets/img/products/FinAstraLogo.png";
 import FinSmartLogo from "../assets/img/products/FinSmartLogo.png";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { HeroPageButton } from "./HeroPageBtn";
 
 const HeroDetails = [
@@ -56,13 +56,26 @@ const HeroDetails = [
 ];
 
 function HeroLeft({ page = 0 }) {
+  const [animate, setAnimate] = useState(false);
+  useEffect(() => {
+    setAnimate(true);
+    const timeout = setTimeout(() => {
+      setAnimate(false);
+    }, 500);
+    return () => clearTimeout(timeout);
+  }, [page]);
+
   return (
     <div className="flex flex-col w-full gap-6 py-12">
-      <p className="h-48 text-4xl text-primary-500">
+      <p
+        className={`h-48 text-4xl transition-opacity duration-500 ease-in-out text-primary-500 ${
+          animate ? "opacity-0" : "opacity-100"
+        }`}
+      >
         {HeroDetails[page].mainText}
       </p>
-      <button className="flex items-center gap-4 px-12 py-4 rounded-lg w-fit bg-primary-500 text-base-50">
-        <span>Request For Demo </span>
+      <button className="flex items-center gap-4 px-12 py-4 transition-all duration-300 ease-in-out rounded-lg w-fit bg-secondary-500 text-base-50 hover:bg-secondary-400 hover:text-primary-500 active:bg-secondary-50 active:text-primary-500 active:underline">
+        <span>Know More</span>
         <ArrowRight className="w-4" />
       </button>
     </div>
@@ -109,11 +122,27 @@ function PageBtnContainer({ currentPage, setCurrentPage }) {
 
 export function Hero() {
   const [currentPage, setCurrentPage] = useState(0);
-  setTimeout(() => {
-    if (currentPage >= 0 && currentPage < 3) {
-      setCurrentPage(currentPage + 1);
-    } else setCurrentPage(0);
-  }, 8000);
+  const intervalRef = useRef(null);
+
+  const resetInverval = useCallback(() => {
+    // Clear existing inverval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+
+    // Start a new inverval
+    intervalRef.current = setInterval(() => {
+      if (currentPage >= 0 && currentPage < 3) {
+        setCurrentPage(currentPage + 1);
+      } else setCurrentPage(0);
+    }, 8000);
+  }, [currentPage]);
+
+  useEffect(() => {
+    resetInverval(); // Reset when mount
+
+    return () => clearInterval(intervalRef.current);
+  }, [resetInverval]);
 
   return (
     <div className="flex px-40 pt-8">

@@ -1,6 +1,7 @@
 import HeroSection from "./Components/HeroSection";
 import LocationSection from "./Components/LocationSection/LocationSection";
 import NumberExpress from "./Components/NumberExpress/NumberExpress";
+import OurCustomer from "./Components/OurCustomer/OurCustomer";
 
 function App() {
   return (
@@ -8,6 +9,7 @@ function App() {
       <HeroSection />
       <LocationSection />
       <NumberExpress />
+      <OurCustomer />
     </>
   );
 }
