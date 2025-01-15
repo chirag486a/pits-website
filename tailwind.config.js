@@ -46,6 +46,7 @@ export default {
           900: "var(--color-gray-900)",
           950: "var(--color-gray-950)",
         },
+        footer: "#F2EFE9",
       },
     },
   },
