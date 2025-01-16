@@ -5,7 +5,7 @@ import FinTechEchoSystemLogo from "../assets/img/products/Fin-Tech-Echo-System-L
 import LekkAstraLogo from "../assets/img/products/LekhAstraLogo.png";
 import FinAstraLogo from "../assets/img/products/FinAstraLogo.png";
 import FinSmartLogo from "../assets/img/products/FinSmartLogo.png";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { HeroPageButton } from "./HeroPageBtn";
 
 const HeroDetails = [
@@ -55,21 +55,12 @@ const HeroDetails = [
   },
 ];
 
-function HeroLeft({ page = 0 }) {
-  const [animate, setAnimate] = useState(false);
-  useEffect(() => {
-    setAnimate(true);
-    const timeout = setTimeout(() => {
-      setAnimate(false);
-    }, 500);
-    return () => clearTimeout(timeout);
-  }, [page]);
-
+function HeroLeft({ page = 0, opacity }) {
   return (
     <div className="flex flex-col w-full gap-6 py-12">
       <p
-        className={`h-48 text-4xl transition-opacity duration-500 ease-in-out text-primary-500 ${
-          animate ? "opacity-0" : "opacity-100"
+        className={`h-48 text-4xl transition-opacity duration-250 ease-in-out text-primary-500 ${
+          opacity ? "opacity-100" : "opacity-0"
         }`}
       >
         {HeroDetails[page].mainText}
@@ -83,6 +74,7 @@ function HeroLeft({ page = 0 }) {
 }
 HeroLeft.propTypes = {
   page: PropTypes.number,
+  opacity: PropTypes.number,
 };
 function HeroRight({ page = 0 }) {
   return (
@@ -105,15 +97,16 @@ HeroRight.propTypes = {
   page: PropTypes.number,
 };
 
-function PageBtnContainer({ currentPage, setCurrentPage }) {
+function PageBtnContainer({ currentPage, onClick }) {
   const pageBtns = [];
+
   for (let i = 0; i < 4; i++) {
     pageBtns.push(
       <HeroPageButton
         active={currentPage === i}
         id={i}
         key={i}
-        setCurrentPage={setCurrentPage}
+        onClick={onClick}
       />
     );
   }
@@ -122,32 +115,44 @@ function PageBtnContainer({ currentPage, setCurrentPage }) {
 
 export function Hero() {
   const [currentPage, setCurrentPage] = useState(0);
+  const [opacity, setOpacity] = useState(1);
   const intervalRef = useRef(null);
 
-  const resetInverval = useCallback(() => {
-    // Clear existing inverval
+  function handlePageBtnClick(e) {
+    if (!e.target.closest("button")) return;
+    setOpacity(0);
+    setTimeout(() => {
+      setCurrentPage(Number(e.target.closest("button").dataset.id));
+    }, 250);
+  }
+
+  useEffect(() => {
+    console.log(currentPage);
+    // Reset Interval
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
-
     // Start a new inverval
     intervalRef.current = setInterval(() => {
-      if (currentPage >= 0 && currentPage < 3) {
-        setCurrentPage(currentPage + 1);
-      } else setCurrentPage(0);
-    }, 8000);
-  }, [currentPage]);
-
-  useEffect(() => {
-    resetInverval(); // Reset when mount
+      console.log("h");
+      setOpacity(0);
+      setTimeout(() => {
+        setCurrentPage((prevPage) =>
+          prevPage >= 0 && prevPage < 3 ? prevPage + 1 : 0
+        );
+        setTimeout(() => {
+          setOpacity(1);
+        });
+      }, 250);
+    }, 7500);
 
     return () => clearInterval(intervalRef.current);
-  }, [resetInverval]);
+  }, [currentPage]);
 
   return (
     <div className="flex px-40 pt-8">
       <div className="w-1/2">
-        <HeroLeft page={currentPage} />
+        <HeroLeft page={currentPage} opacity={opacity} />
       </div>
       <div className="flex flex-col w-1/2 gap-8">
         <HeroRight page={currentPage} />
@@ -155,6 +160,7 @@ export function Hero() {
           <PageBtnContainer
             currentPage={currentPage}
             setCurrentPage={setCurrentPage}
+            onClick={handlePageBtnClick}
           />
         </div>
       </div>
