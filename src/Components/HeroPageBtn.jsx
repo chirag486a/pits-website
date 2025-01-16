@@ -1,16 +1,15 @@
 import PropTypes from "prop-types";
-export function HeroPageButton({ active = false, id, setCurrentPage }) {
-  function handlePageBtnClick(e) {
-    console.log("hello");
-    if (!e.target.closest("button")) return;
-    setCurrentPage(Number(e.target.closest("button").dataset.id));
-  }
+export function HeroPageButton({
+  active = false,
+  id,
+  onClick: handlePageBtnClick,
+}) {
   if (active) {
     return (
       <button
         className="w-4 h-4 border rounded-full bg-primary-500 opacity-20 border-primary-500"
         data-id={id}
-        onClick={(e) => handlePageBtnClick(e)}
+        onClick={handlePageBtnClick}
       ></button>
     );
   } else {
@@ -18,7 +17,7 @@ export function HeroPageButton({ active = false, id, setCurrentPage }) {
       <button
         className="w-4 h-4 border rounded-full opacity-20 border-primary-500"
         data-id={id}
-        onClick={(e) => handlePageBtnClick(e)}
+        onClick={handlePageBtnClick}
       ></button>
     );
   }
@@ -27,5 +26,5 @@ export function HeroPageButton({ active = false, id, setCurrentPage }) {
 HeroPageButton.propTypes = {
   active: PropTypes.bool,
   id: PropTypes.number,
-  setCurrentPage: PropTypes.func,
+  onClick: PropTypes.func,
 };
