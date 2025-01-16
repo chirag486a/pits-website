@@ -1,5 +1,5 @@
 import { TopBar } from "./TopBar";
-import { Navbar } from "./NavBar";
+import { Navbar } from "./Navbar";
 import { Hero } from "./Hero";
 import Down from "../assets/icons/down.svg?react";
 
