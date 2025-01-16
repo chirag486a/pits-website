@@ -5,7 +5,7 @@ import FinTechEchoSystemLogo from "../assets/img/products/Fin-Tech-Echo-System-L
 import LekkAstraLogo from "../assets/img/products/LekhAstraLogo.png";
 import FinAstraLogo from "../assets/img/products/FinAstraLogo.png";
 import FinSmartLogo from "../assets/img/products/FinSmartLogo.png";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { HeroPageButton } from "./HeroPageBtn";
 
 const HeroDetails = [
@@ -122,7 +122,9 @@ function PageBtnContainer({ currentPage, onClick }) {
 export function Hero() {
   const [currentPage, setCurrentPage] = useState(0);
   const [opacity, setOpacity] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
   const intervalRef = useRef(null);
+  const divRef = useRef(null);
   const transitionDuration = 250;
   const slideDuration = 7500;
   // 1. Off
@@ -135,6 +137,7 @@ export function Hero() {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
+    setOpacity(0);
     // 3. On
     setTimeout(() => {
       setOpacity(1);
@@ -151,6 +154,7 @@ export function Hero() {
       }, transitionDuration);
     }, slideDuration);
   };
+
   function handlePageBtnClick(e) {
     if (!e.target.closest("button")) return;
     if (Number(e.target.closest("button").dataset.id) === currentPage) {
@@ -165,6 +169,23 @@ export function Hero() {
       setCurrentPage(Number(e.target.closest("button").dataset.id));
     }, transitionDuration);
   }
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) {
+          setIsVisible(false);
+          window.removeEventListener("keyup", handleKeyPress);
+          return;
+        }
+        setIsVisible(true);
+      });
+    },
+    {
+      root: null, // Default is the viewport
+      rootMargin: "0px", // Margin around the root
+      threshold: 0.5, // Trigger callback when 50% of the element is visible
+    }
+  );
 
   useEffect(() => {
     // Reset Interval
@@ -173,9 +194,41 @@ export function Hero() {
     return () => clearInterval(intervalRef.current);
   }, [currentPage]);
 
+  const handleKeyPress = useCallback(
+    (e) => {
+      if (!isVisible) return;
+      if (!e) return;
+      if (!(e.key === "ArrowRight" || e.key === "ArrowLeft")) return;
+      setOpacity(0);
+      if (e.key === "ArrowRight") {
+        setTimeout(() => {
+          setCurrentPage((prevPage) =>
+            prevPage >= 0 && prevPage < 3 ? prevPage + 1 : 0
+          );
+        }, transitionDuration);
+      }
+      if (e.key === "ArrowLeft") {
+        setTimeout(() => {
+          setCurrentPage((prevPage) =>
+            prevPage > 0 && prevPage <= 3 ? prevPage - 1 : 3
+          );
+        }, transitionDuration);
+      }
+    },
+    [isVisible]
+  );
+  if (divRef.current) {
+    observer.observe(divRef.current);
+  }
+  useEffect(() => {
+    window.addEventListener("keyup", handleKeyPress);
+    return () => {
+      window.removeEventListener("keyup", handleKeyPress);
+    };
+  }, [handleKeyPress]);
 
   return (
-    <div className="flex px-40 pt-8">
+    <div className="flex px-40 pt-8" ref={divRef}>
       <div className="w-1/2">
         <HeroLeft page={currentPage} opacity={opacity} />
       </div>
