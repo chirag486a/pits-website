@@ -76,10 +76,15 @@ HeroLeft.propTypes = {
   page: PropTypes.number,
   opacity: PropTypes.number,
 };
-function HeroRight({ page = 0 }) {
+function HeroRight({ page = 0, opacity }) {
   return (
-    <div className="flex flex-col w-full">
-      <div className="w-full overflow-hidden h-72 max-h-96">
+    <div
+      className={
+        "flex flex-col w-full transition-opacity ease-in-out duration-250  " +
+        `${opacity ? "opacity-100" : "opacity-0"} `
+      }
+    >
+      <div className="w-full h-72 max-h-96 ">
         <img
           src={HeroDetails[page].productLogo}
           alt={HeroDetails[page].productLogoName + " Logo"}
@@ -95,6 +100,7 @@ function HeroRight({ page = 0 }) {
 }
 HeroRight.propTypes = {
   page: PropTypes.number,
+  opacity: PropTypes.number,
 };
 
 function PageBtnContainer({ currentPage, onClick }) {
@@ -115,39 +121,58 @@ function PageBtnContainer({ currentPage, onClick }) {
 
 export function Hero() {
   const [currentPage, setCurrentPage] = useState(0);
-  const [opacity, setOpacity] = useState(1);
+  const [opacity, setOpacity] = useState(0);
   const intervalRef = useRef(null);
+  const transitionDuration = 250;
+  const slideDuration = 7500;
+  // 1. Off
+  // 2. Change
+  // 3. On
+  // 4. Wait
+  // 5. Step 1
 
-  function handlePageBtnClick(e) {
-    if (!e.target.closest("button")) return;
-    setOpacity(0);
-    setTimeout(() => {
-      setCurrentPage(Number(e.target.closest("button").dataset.id));
-    }, 250);
-  }
-
-  useEffect(() => {
-    console.log(currentPage);
-    // Reset Interval
+  const resetInterval = () => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
-    // Start a new inverval
+    // 3. On
+    setTimeout(() => {
+      setOpacity(1);
+    }, transitionDuration);
+    // Start a new inverval (4. Wait)
     intervalRef.current = setInterval(() => {
-      console.log("h");
+      // 1. Off
       setOpacity(0);
+      // 2. Change
       setTimeout(() => {
         setCurrentPage((prevPage) =>
           prevPage >= 0 && prevPage < 3 ? prevPage + 1 : 0
         );
-        setTimeout(() => {
-          setOpacity(1);
-        });
-      }, 250);
-    }, 7500);
+      }, transitionDuration);
+    }, slideDuration);
+  };
+  function handlePageBtnClick(e) {
+    if (!e.target.closest("button")) return;
+    if (Number(e.target.closest("button").dataset.id) === currentPage) {
+      // 3. On(250ms) & 4. Wait(7500)
+      resetInterval();
+      return;
+    }
+    // 1. Off
+    setOpacity(0);
+    // 2. Change
+    setTimeout(() => {
+      setCurrentPage(Number(e.target.closest("button").dataset.id));
+    }, transitionDuration);
+  }
+
+  useEffect(() => {
+    // Reset Interval
+    resetInterval();
 
     return () => clearInterval(intervalRef.current);
   }, [currentPage]);
+
 
   return (
     <div className="flex px-40 pt-8">
@@ -155,7 +180,7 @@ export function Hero() {
         <HeroLeft page={currentPage} opacity={opacity} />
       </div>
       <div className="flex flex-col w-1/2 gap-8">
-        <HeroRight page={currentPage} />
+        <HeroRight page={currentPage} opacity={opacity} />
         <div className="flex items-center justify-center w-full h-10 gap-6">
           <PageBtnContainer
             currentPage={currentPage}
